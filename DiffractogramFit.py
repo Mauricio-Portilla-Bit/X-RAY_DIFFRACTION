@@ -1,22 +1,14 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import random
 
 # CLASE DE FIT PEAKS
 class FitPeaks():
 
-    # Parámetros del Método
-    H = 0.54
-    A = 664.2
-    ETA = 0.744
-    BKG = 23.28
-    SUMCHI = 0
-
-    # Data Frame
 
     # Instanciar una clase para fit peaks
-    def __init__(self, df, H, A, ETA, BKG, SUMCHI) -> None:
+    def __init__(self, df, H, A, ETA, BKG) -> None:
 
         # Instanciar Parámetros
         self.df = df
@@ -24,7 +16,6 @@ class FitPeaks():
         self.A = A
         self.ETA = ETA
         self.BKG = BKG
-        self.SUMCHI = 0
 
         # Desplazar los datos al cero
         y_peak = max(self.df["y"])
@@ -44,38 +35,84 @@ class FitPeaks():
         self.df["PV_BKG"] = self.df["PV"] + self.BKG
 
         # Instanciar el Error Cuadrado
-        self.SUMCHI = sum(((self.df["PV_BKG"] - self.df["y"])**2)/self.df["y"])
+        self.SUMCHI2 = sum(((self.df["PV_BKG"] - self.df["y"])**2)/self.df["y"])
+
+        self.df_test = self.df
 
     # Optimizar Parámetos
     def optimize_params(self):
 
+        # MÉTODO DE OPTIMIZACIÓN : RECORRIDO SIMULADO
 
-        # MÉTODO DE OPTIMIZACIÓN
-        #
-        #
-        #
+        # Constantes de la Optimización
+        Temp = 150 # Temperatura Inicial
+        alfa = 0.2 # Mecanismo de descenso
+        L = 2000 # Número de Iteraciones en cada nivel
+        Tempf = 0 # Temperatura Final
+        Delta = 0
 
-        return {"H": self.H, "A": self.A, "ETA": self.ETA, "BKG": self.BKG, "SUMCHI": self.SUMCHI}
+        # Establecer una Posición Actual
+        self.H = random.random()
+        self.ETA = random.random()
+        self.A = random.random()*1000
+        self.BKG = random.random()*100
+        self.update_vales()
+
+        # ITERACIONES
+        while Temp > Tempf:
+
+            # Iterar L veces el model o
+            for i in range(L):
+
+                # Vecino Aleatorio para una Posición posible
+                H_test = random.random()
+                ETA_test = random.random()
+                A_test = random.random()*1000
+                BKG_test = random.random()*100
+
+                # Probar la Posición
+                SUMCHI2_test = self.evaluate_function(H_test, ETA_test, A_test, BKG_test)
+
+                # Evaluar si el error aumentó o disminuyó
+                Delta = SUMCHI2_test - self.SUMCHI2
+
+                if Delta < 0 or random.random() < np.exp(-Delta/Temp):
+
+                    self.H = H_test
+                    self.ETA = ETA_test
+                    self.A = A_test
+                    self.BKG = BKG_test
+                    self.update_vales()
+
+            Temp = Temp - alfa
+            print(str(Temp), ")", str(self.SUMCHI2))
+        return {"H": self.H, "A": self.A, "ETA": self.ETA, "BKG": self.BKG, "SUMCHI2": self.SUMCHI2}
 
     # Retornar Parámetros
     def get_params(self):
-        return {"H": self.H, "A": self.A, "ETA": self.ETA, "BKG": self.BKG, "SUMCHI": self.SUMCHI}
+        return {"H": self.H, "A": self.A, "ETA": self.ETA, "BKG": self.BKG, "SUMCHI2": self.SUMCHI2}
 
-    # Probar el modelo
-    def test_params(self):
-        self.generate_function()
-        self.sum_chi2()
 
-    # Crear PseudoVoight + BKG
-    def generate_function(self):
+    # Evaluar la función dado unos parámetros
+    def evaluate_function(self, H_, ETA_, A_, BKG_):
+        df_test = self.df
+        df_test["L"] = (1/(2*np.pi))*(H_ / ((H_/2)**2 + df_test["x - x0"]**2))
+        df_test["G"] = (1/H_)*(np.sqrt((4*np.log(2))/np.pi))*np.exp(-4*np.log(2)*((df_test["x - x0"]/H_)**2))
+        df_test["PV"] = A_*((ETA_*df_test["L"]) + (1 - ETA_)*df_test["G"])
+        df_test["PV_BKG"] = df_test["PV"] + BKG_
+        SUMCHI2_test = sum(((df_test["PV_BKG"] - df_test["y"])**2)/df_test["y"])
+        return SUMCHI2_test
+
+    # Calcular el error del modelo
+    def sum_chi2(self):
+        self.SUMCHI2 = sum(((self.df["PV_BKG"] - self.df["y"])**2)/self.df["y"])
+
+    def update_vales(self):
         self.df["L"] = (1/(2*np.pi))*(self.H / ((self.H/2)**2 + self.df["x - x0"]**2))
         self.df["G"] = (1/self.H)*(np.sqrt((4*np.log(2))/np.pi))*np.exp(-4*np.log(2)*((self.df["x - x0"]/self.H)**2))
         self.df["PV"] = self.A*((self.ETA*self.df["L"]) + (1 - self.ETA)*self.df["G"])
         self.df["PV_BKG"] = self.df["PV"] + self.BKG
-
-    # Calcular el error del modelo
-    def sum_chi2(self):
-        self.SUMCHI = sum(((self.df["PV_BKG"] - self.df["y"])**2)/self.df["y"])
+        self.SUMCHI2 = sum(((self.df["PV_BKG"] - self.df["y"])**2)/self.df["y"])
 
     # Graficar los puntos y el modelo
     def graph(self):
@@ -96,15 +133,32 @@ class FitPeaks():
 # DATOS EXPERIMENTALES
 raw_data = pd.read_csv("muestra_experimental.csv", names=["x", "y"])
 
-H_ = 0.54
-A_ = 664.2
-ETA_ = 0.744
-BKG_ = 23.28
-SUMCHI_ = 0
+#H_0 = 0.54
+#A_0 = 664.2
+#ETA_0 = 0.744
+#BKG_0 = 23.28
 
-a = FitPeaks(raw_data, H_, A_, ETA_, BKG_, SUMCHI_)
-v = a.get_df()
-print(v)
+H_0 = 0.521486278631984
+A_0 = 642.0679663975903
+ETA_0 = 0.7670427175795259
+BKG_0 = 25.737969372925107
+
+a = FitPeaks(raw_data, H_0, A_0, ETA_0, BKG_0)
+#a.graph()
+#v = a.get_df()
+# print(v)
 d = a.optimize_params()
 print(d)
-a.graph()
+
+
+# OBLIGATORIO
+# - Encontrar los máximos
+# - Scherrer
+# - WH
+# - HW
+# - Determinar el tamaño de partícula
+# - Gráficas de los métodos
+
+# NICE TO HAVE:
+# - Warren Averbach (Convolusión)
+# - Determinar el elemento presente en el programa
