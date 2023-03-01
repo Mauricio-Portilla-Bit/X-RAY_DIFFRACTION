@@ -47,16 +47,15 @@ class FitPeaks():
         # Constantes de la Optimización
         Temp = 150 # Temperatura Inicial
         alfa = 0.2 # Mecanismo de descenso
-        L = 2000 # Número de Iteraciones en cada nivel
+        L = 100 # Número de Iteraciones en cada nivel
         Tempf = 0 # Temperatura Final
         Delta = 0
 
-        # Establecer una Posición Actual
-        self.H = random.random()
-        self.ETA = random.random()
-        self.A = random.random()*1000
-        self.BKG = random.random()*100
-        self.update_vales()
+        # Vecino Aleatorio para la Posición actual
+        H_curr = random.random()
+        ETA_curr = random.random()
+        A_curr = random.random() * 1000
+        BKG_curr = random.random() * 100
 
         # ITERACIONES
         while Temp > Tempf:
@@ -65,24 +64,31 @@ class FitPeaks():
             for i in range(L):
 
                 # Vecino Aleatorio para una Posición posible
-                H_test = random.random()
-                ETA_test = random.random()
-                A_test = random.random()*1000
-                BKG_test = random.random()*100
+                H_pos = random.random()
+                ETA_pos = random.random()
+                A_pos = random.random()*1000
+                BKG_pos = random.random()*100
 
                 # Probar la Posición
-                SUMCHI2_test = self.evaluate_function(H_test, ETA_test, A_test, BKG_test)
+                SUMCHI2_pos = self.evaluate_function(H_pos, ETA_pos, A_pos, BKG_pos)
+                SUMCHI2_curr = self.evaluate_function(H_curr, ETA_curr, A_curr, BKG_curr)
 
                 # Evaluar si el error aumentó o disminuyó
-                Delta = SUMCHI2_test - self.SUMCHI2
+                Delta = SUMCHI2_pos - SUMCHI2_curr
 
                 if Delta < 0 or random.random() < np.exp(-Delta/Temp):
 
-                    self.H = H_test
-                    self.ETA = ETA_test
-                    self.A = A_test
-                    self.BKG = BKG_test
-                    self.update_vales()
+                    H_curr = H_pos
+                    ETA_curr = ETA_pos
+                    A_curr = A_pos
+                    BKG_curr = BKG_pos
+
+                    if SUMCHI2_pos - self.SUMCHI2 < 0:
+                        self.H = H_pos
+                        self.ETA = ETA_pos
+                        self.A = A_pos
+                        self.BKG = BKG_pos
+                        self.update_vales()
 
             Temp = Temp - alfa
             print(str(Temp), ")", str(self.SUMCHI2))
@@ -138,10 +144,15 @@ raw_data = pd.read_csv("muestra_experimental.csv", names=["x", "y"])
 #ETA_0 = 0.744
 #BKG_0 = 23.28
 
-H_0 = 0.521486278631984
-A_0 = 642.0679663975903
-ETA_0 = 0.7670427175795259
-BKG_0 = 25.737969372925107
+#H_0 = 0.521486278631984
+#A_0 = 642.0679663975903
+#ETA_0 = 0.7670427175795259
+#BKG_0 = 25.737969372925107
+
+H_0 = 0.2
+A_0 = 120
+ETA_0 = 0.5
+BKG_0 = 20
 
 a = FitPeaks(raw_data, H_0, A_0, ETA_0, BKG_0)
 #a.graph()
