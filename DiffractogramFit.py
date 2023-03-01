@@ -45,9 +45,9 @@ class FitPeaks():
         # MÉTODO DE OPTIMIZACIÓN : RECORRIDO SIMULADO
 
         # Constantes de la Optimización
-        Temp = 150 # Temperatura Inicial
-        alfa = 0.2 # Mecanismo de descenso
-        L = 100 # Número de Iteraciones en cada nivel
+        Temp = 400 # Temperatura Inicial
+        alfa = 1 # Mecanismo de descenso
+        L = 200 # Número de Iteraciones en cada nivel
         Tempf = 0 # Temperatura Final
         Delta = 0
 
