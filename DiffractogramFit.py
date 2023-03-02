@@ -45,8 +45,8 @@ class FitPeaks():
         # MÉTODO DE OPTIMIZACIÓN : RECORRIDO SIMULADO
 
         # Constantes de la Optimización
-        Temp = 400 # Temperatura Inicial
-        alfa = 1 # Mecanismo de descenso
+        Temp = 500 # Temperatura Inicial
+        alfa = 5 # 0.1 Mecanismo de descenso
         L = 200 # Número de Iteraciones en cada nivel
         Tempf = 0 # Temperatura Final
         Delta = 0
@@ -57,8 +57,12 @@ class FitPeaks():
         A_curr = random.random() * 1000
         BKG_curr = random.random() * 100
 
+        fig = plt.figure()
+
         # ITERACIONES
         while Temp > Tempf:
+
+          #  plt.clf()
 
             # Iterar L veces el model o
             for i in range(L):
@@ -92,6 +96,17 @@ class FitPeaks():
 
             Temp = Temp - alfa
             print(str(Temp), ")", str(self.SUMCHI2))
+
+         #   plt.plot(self.df["x - x0"], self.df["PV_BKG"], c="b")
+         #   plt.scatter(self.df["x - x0"], self.df["y"], c="r")
+         #   plt.grid()
+         #   plt.xlabel("2*Theta")
+         #   plt.ylabel("Intensidad")
+         #   plt.title("DIFRACTOGRAMA")
+         #   plt.pause(0.00001)
+
+        #plt.show()
+
         return {"H": self.H, "A": self.A, "ETA": self.ETA, "BKG": self.BKG, "SUMCHI2": self.SUMCHI2}
 
     # Retornar Parámetros
@@ -137,7 +152,18 @@ class FitPeaks():
 
 
 # DATOS EXPERIMENTALES
-raw_data = pd.read_csv("muestra_experimental.csv", names=["x", "y"])
+#raw_data = pd.read_csv("muestra_experimental.csv", names=["x", "y"])
+raw_data = pd.read_csv("TiO2-Anatasa_PD_datos-procesados.csv", names=["x", "y"])
+
+
+
+plt.figure(1)
+plt.plot(raw_data["x"], raw_data["y"], c="b")
+plt.grid()
+plt.xlabel("2*Theta")
+plt.ylabel("Intensidad")
+plt.title("DIFRACTOGRAMA")
+plt.show()
 
 #H_0 = 0.54
 #A_0 = 664.2
@@ -154,12 +180,14 @@ A_0 = 120
 ETA_0 = 0.5
 BKG_0 = 20
 
-a = FitPeaks(raw_data, H_0, A_0, ETA_0, BKG_0)
+#a = FitPeaks(raw_data, H_0, A_0, ETA_0, BKG_0)
 #a.graph()
 #v = a.get_df()
 # print(v)
-d = a.optimize_params()
-print(d)
+#d = a.optimize_params()
+#print(d)
+
+
 
 
 # OBLIGATORIO
