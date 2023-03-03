@@ -42,12 +42,13 @@ class FitPeaks():
     # Optimizar Parámetos
     def optimize_params(self):
 
+
         # MÉTODO DE OPTIMIZACIÓN : RECORRIDO SIMULADO
 
         # Constantes de la Optimización
-        Temp = 500 # Temperatura Inicial
-        alfa = 5 # 0.1 Mecanismo de descenso
-        L = 200 # Número de Iteraciones en cada nivel
+        Temp = 1000 # Temperatura Inicial
+        alfa = 10 # 0.1 Mecanismo de descenso
+        L = 500 # Número de Iteraciones en cada nivel
         Tempf = 0 # Temperatura Final
         Delta = 0
 
@@ -70,7 +71,7 @@ class FitPeaks():
                 # Vecino Aleatorio para una Posición posible
                 H_pos = random.random()
                 ETA_pos = random.random()
-                A_pos = random.random()*1000
+                A_pos = random.random()*8000
                 BKG_pos = random.random()*100
 
                 # Probar la Posición
@@ -152,41 +153,40 @@ class FitPeaks():
 
 
 # DATOS EXPERIMENTALES
-#raw_data = pd.read_csv("muestra_experimental.csv", names=["x", "y"])
 raw_data = pd.read_csv("TiO2-Anatasa_PD_datos-procesados.csv", names=["x", "y"])
 
+# Realización de Cortes
+cortes = [{"xi": 24.5, "xf": 26.5},
+          {"xi": 36, "xf": 37.3},
+          {"xi": 37.3, "xf": 38.26},
+          {"xi": 38.26, "xf": 39},
+          {"xi": 47, "xf": 49.5}]
 
-
-plt.figure(1)
-plt.plot(raw_data["x"], raw_data["y"], c="b")
-plt.grid()
-plt.xlabel("2*Theta")
-plt.ylabel("Intensidad")
-plt.title("DIFRACTOGRAMA")
-plt.show()
-
-#H_0 = 0.54
-#A_0 = 664.2
-#ETA_0 = 0.744
-#BKG_0 = 23.28
-
-#H_0 = 0.521486278631984
-#A_0 = 642.0679663975903
-#ETA_0 = 0.7670427175795259
-#BKG_0 = 25.737969372925107
+y_peaks = np.linspace(0, 30000, 1000)
+x_peaks = np.linspace(1, 1, 1000)
 
 H_0 = 0.2
 A_0 = 120
 ETA_0 = 0.5
 BKG_0 = 20
 
-#a = FitPeaks(raw_data, H_0, A_0, ETA_0, BKG_0)
-#a.graph()
-#v = a.get_df()
-# print(v)
-#d = a.optimize_params()
-#print(d)
+a = []
+data = []
+#a.append(FitPeaks(raw_data, H_0, A_0, ETA_0, BKG_0))
 
+# Split data
+for i in range(len(cortes)):
+
+    data.append(raw_data.loc[(raw_data["x"] > cortes[i]["xi"]) &
+                (raw_data["x"] < cortes[i]["xf"])].copy())
+
+    # Instantiate Objects
+    a.append(FitPeaks(data[i], H_0, A_0, ETA_0, BKG_0))
+
+    # Optimize values
+    d = a[i].optimize_params()
+    print(d)
+    a[i].graph()
 
 
 
