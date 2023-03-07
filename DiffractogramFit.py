@@ -58,17 +58,9 @@ class FitPeaks():
         A_curr = random.random() * 1000
         BKG_curr = random.random() * 100
 
-        # Diferenciables del error según el cambio de variable
-        dError = 0
-        dError_dH = 0
-        dError_dETA = 0
-        dError_dA = 0
-        dError_dBKG = 0
 
         # ITERACIONES
         while Temp > Tempf:
-
-          #  plt.clf()
 
             # Iterar L veces el model o
             for i in range(L):
