@@ -189,7 +189,7 @@ class FitPeaks():
 
 
 # DATOS EXPERIMENTALES
-raw_data = pd.read_csv("TiO2-Anatasa_PD_datos-procesados.csv", names=["x", "y"])
+raw_data = pd.read_csv("TiO2-Anatasa_PD_datos-procesados_2.csv", names=["x", "y"])
 
 # Realización de Cortes
 cortes = [{"xi": 24.5, "xf": 26.5},
