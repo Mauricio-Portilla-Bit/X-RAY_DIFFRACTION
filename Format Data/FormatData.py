@@ -24,6 +24,4 @@ data = pd.DataFrame({
     "y": y
 })
 
-print(data)
-
-# raw_data = pd.read_csv("TiO2-Anatasa_PD_datos-procesados_2.csv", names=["x", "y"])
+data.to_csv('difractograma-anatasa.csv', header=False, index=False)
