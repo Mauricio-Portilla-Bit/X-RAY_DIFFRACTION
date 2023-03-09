@@ -48,7 +48,7 @@ class FitPeaks():
         # Constantes de la Optimización
         Temp = 10000 # Temperatura Inicial
         alfa = 200 # 0.1 Mecanismo de descenso
-        L = 1000 # Número de Iteraciones en cada nivel
+        L = 100 # Número de Iteraciones en cada nivel
         Tempf = 9000 # Temperatura Final
         Delta = 0
 
@@ -93,7 +93,7 @@ class FitPeaks():
                     # Explorar si existe un mínimo más cercano
                     for l in range(4):
 
-                        for p in range(-500, 500, 10):
+                        for p in range(-500, 500, 2):
 
                             SUMCHI2_pos = self.evaluate_function(H_pos, ETA_pos, A_pos, BKG_pos)
 
@@ -103,7 +103,7 @@ class FitPeaks():
                                 if Delta_min < 0:
                                     H_pos = H_pos + p/500
 
-                            elif l == 1 and ETA_pos + p/500 > 0: # ETA explore
+                            elif l == 1 and ETA_pos + p/500 <= 1 and ETA_pos + p/500 >= 0: # ETA explore
                                 SUMCHI2_pos_min = self.evaluate_function(H_pos, ETA_pos + p/500, A_pos, BKG_pos)
                                 Delta_min = SUMCHI2_pos_min - SUMCHI2_pos
 
@@ -192,11 +192,11 @@ class FitPeaks():
 raw_data = pd.read_csv("Format Data/difractograma-anatasa.csv", names=["x", "y"])
 
 # Realización de Cortes
-cortes = [{"xi": 24.5, "xf": 26.5},
-          {"xi": 36, "xf": 37.3},
-          {"xi": 37.3, "xf": 38.26},
-          {"xi": 38.26, "xf": 39},
-          {"xi": 47, "xf": 49.5}]
+cortes = [{"xi": 24.50, "xf": 26.50},
+          {"xi": 36.00, "xf": 37.30},
+          {"xi": 37.30, "xf": 38.26},
+          {"xi": 38.26, "xf": 39.00},
+          {"xi": 47.00, "xf": 49.50}]
 
 y_peaks = np.linspace(0, 30000, 1000)
 x_peaks = np.linspace(1, 1, 1000)
@@ -208,7 +208,6 @@ BKG_0 = 20
 
 a = []
 data = []
-#a.append(FitPeaks(raw_data, H_0, A_0, ETA_0, BKG_0))
 
 # Split data
 for i in range(len(cortes)):
